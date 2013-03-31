@@ -35,7 +35,7 @@ $ git push -u origin master
 ```
 
 So as you can see, in the long run it can save you quite a bit of typing.
-Also, it lets you avoid the sloppyness in making your whole home folder an
+Also, it lets you avoid the sloppiness in making your whole home folder an
 active git repository.
 
 *Note: actually, the program will not do any of this in the event that the
