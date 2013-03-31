@@ -1,0 +1,118 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use 5.010;
+
+use File::Compare;
+use File::Copy::Recursive qw(fcopy rcopy dircopy fmove rmove dirmove);
+use File::Find;
+
+### Options
+my $git_dir = "$ENV{HOME}/src/githome";
+my $enable_finder = 1; ## search for your argument if the file isn't found.
+my $max_finder_results = 20; ## how many matches to actually print.
+                             ## (a count is shown otherwise)
+### End options
+
+my $action = shift @ARGV;
+my $files  = \@ARGV;
+
+unless ( -d "${git_dir}/.git" ) {
+    say "$git_dir is not a git repository";
+    exit 1;
+}
+
+say "cd $git_dir";
+chdir $git_dir;
+
+if ( $action =~ /^up(load)*$/i ) {
+    &upload( $files );
+}
+elsif ( $action =~ /^down(load)*$/i ) {
+    &download( $files );
+}
+else {
+    say "Unrecognized action: '$action'";
+    exit 1;
+}
+
+### Subroutines
+sub download {
+    my $list = shift;
+    say "git pull";
+    for my $base ( @$list ) {
+        my $local_file = "$ENV{HOME}/${base}";
+        my $git_file = "${git_dir}/${base}";
+        say "\n----\n";
+        if ( -e $git_file ) {
+            if ( compare( $local_file, $git_file) == 0 ) {
+                say "'$base' is already up-to date.";
+            }
+            else {
+                say "cp -r '$git_file' '$local_file' ";
+                if ( -d $git_file ) {
+                    dircopy( $git_file, $ENV{HOME} );
+                }
+                else {
+                    fcopy( $git_file, $ENV{HOME} );
+                }
+            }
+        }
+        else {
+            &finder( $base, $git_dir );
+        }
+    }
+}
+
+sub finder {
+    my ($string, $dir) = @_;
+    say "File '${dir}/${string}' does not exist.";
+    if ( $enable_finder ) {
+        my @results;
+        if ( $dir =~ /$ENV{HOME}/ ) {
+            @results = <$dir/.*$string* $dir/*$string*>;
+        }
+        else {
+            find( sub{exit if tr!/!! >1; push @results, $_ if /$string/i}, $dir);
+        }
+        my $count = $#results +1;
+        if ( $count > 0 && $count <= $max_finder_results ) {
+            say "Did you mean:";
+            say "\t$_" for sort @results;
+        }
+        else {
+            say "$count files matched pattern: /$string/i";
+        }
+    }
+
+}
+
+sub upload {
+    my $list = shift;
+    for my $base ( @$list ) {
+        my $local_file = "$ENV{HOME}/${base}";
+        my $git_file = "${git_dir}/${base}";
+        say "\n----\n";
+        if ( -e $local_file ) {
+            if ( compare( $local_file, $git_file) == 0 ) {
+                say "'$base' is already up-to date.";
+            }
+            else {
+                say "cp -r '$local_file' '$git_file'";
+                say "git add $base";
+                say "git commit -m 'Update $base'";
+                if ( -d $local_file ) {
+                    dircopy( $local_file, $git_dir );
+                }
+                else {
+                    fcopy( $local_file, $git_dir );
+                }
+            }
+        }
+        else {
+            &finder( $base, $ENV{HOME} );
+        }
+    }
+}
+### End subroutines
+
