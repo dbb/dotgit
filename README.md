@@ -24,14 +24,14 @@ $ dotgit up .Xdefaults .vimrc .zsh
 This is functionally equivalent to:
 
 ```
-cp ~/.Xdefaults ~/dotfiles
-cp ~/.vimrc ~/dotfiles
-cp ~/.zshrc ~/dotfiles
+$ cp ~/.Xdefaults ~/dotfiles
+$ cp ~/.vimrc ~/dotfiles
+$ cp ~/.zshrc ~/dotfiles
 
-cd ~/dotfiles
-git add .Xdefaults .vimrc .zsh
-git commit -m 'Update: .Xdefaults .vimrc .zsh'
-git push -u origin master
+$ cd ~/dotfiles
+$ git add .Xdefaults .vimrc .zsh
+$ git commit -m 'Update: .Xdefaults .vimrc .zsh'
+$ git push -u origin master
 ```
 
 So as you can see, in the long run it can save you quite a bit of typing.
