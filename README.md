@@ -57,6 +57,10 @@ $ cp .vimrc ~
 $ cp .zshrc ~
 ```
 
+##TODO
+* add "update all" function
+* add support for loading specific file sets from a config file
+
 ##Requirements
 * git
 * Perl version 5.10 or newer
